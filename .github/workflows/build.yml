@@ -4,13 +4,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
-      - run: chmod +x gradlew && ./gradlew assembleDebug
+      - name: Show repo layout
+        run: |
+          pwd
+          ls -la
+          find . -maxdepth 3 -name "gradlew" -o -maxdepth 3 -name "settings.gradle*" -o -maxdepth 3 -name "build.gradle*"
+      - name: Build
+        run: |
+          GRADLEW=$(find . -maxdepth 3 -name gradlew | head -n 1)
+          echo "Using: $GRADLEW"
+          cd "$(dirname "$GRADLEW")"
+          chmod +x ./gradlew
+          ./gradlew assembleDebug --stacktrace --no-daemon
       - uses: actions/upload-artifact@v4
         with:
           name: app-debug
-          path: app/build/outputs/apk/debug/*.apk
+          path: "**/build/outputs/apk/debug/*.apk"
